@@ -41,7 +41,13 @@ def play_game(
             # the same game. If it's not, break out
             if not game.update_turn():
                 break
-    
+
+            # calculate number of buildings we have
+            buildings = 0
+            for cell in game.me.cells.values():
+            	if cell.building.name != 'empty':
+            		buildings += 1
+
             # Check if you exist in the game. If not, wait for the next round.
             # You may not appear immediately after you join. But you should be 
             # in the game after one round.
@@ -49,49 +55,7 @@ def play_game(
                 continue
     
             me = game.me
-    
-            # game.me.cells is a dict, where the keys are Position and the values
-            # are MapCell. Get all my cells.
-            for cell in game.me.cells.values():
-                # Check the surrounding position
-                for pos in cell.position.get_surrounding_cardinals():
-                    # Get the MapCell object of that position
-                    c = game.game_map[pos]
-                    # Attack if the cost is less than what I have, and the owner
-                    # is not mine, and I have not attacked it in this round already
-                    # We also try to keep our cell number under 100 to avoid tax
-                    if c.attack_cost < me.energy and c.owner != game.uid \
-                            and c.position not in my_attack_list \
-                            and len(me.cells) < 95:
-                        # Add the attack command in the command list
-                        # Subtract the attack cost manually so I can keep track
-                        # of the energy I have.
-                        # Add the position to the attack list so I won't attack
-                        # the same cell
-                        cmd_list.append(game.attack(pos, c.attack_cost))
-                        print("We are attacking ({}, {}) with {} energy".format(pos.x, pos.y, c.attack_cost))
-                        game.me.energy -= c.attack_cost
-                        my_attack_list.append(c.position)
-    
-                # If we can upgrade the building, upgrade it.
-                # Notice can_update only checks for upper bound. You need to check
-                # tech_level by yourself. 
-                if cell.building.can_upgrade and \
-                        (cell.building.is_home or cell.building.level < me.tech_level) and \
-                        cell.building.upgrade_gold < me.gold and \
-                        cell.building.upgrade_energy < me.energy:
-                    cmd_list.append(game.upgrade(cell.position))
-                    print("We upgraded ({}, {})".format(cell.position.x, cell.position.y))
-                    me.gold   -= cell.building.upgrade_gold
-                    me.energy -= cell.building.upgrade_energy
-                    
-                # Build a random building if we have enough gold
-                if cell.owner == me.uid and cell.building.is_empty and me.gold >= BUILDING_COST[0]:
-                    building = random.choice([BLD_FORTRESS, BLD_GOLD_MINE, BLD_ENERGY_WELL])
-                    cmd_list.append(game.build(cell.position, building))
-                    print("We build {} on ({}, {})".format(building, cell.position.x, cell.position.y))
-                    me.gold -= 100
-    
+            ### unknown
             
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
@@ -106,7 +70,24 @@ def defense():
 	pass
 def build():
 	pass
-def upgrade():
-	pass
+
+# calculates the upgrade value for a cell
+# val = net change in gold rate * gold_co + net change in energy rate * energy_co
+# returns 0 if no building or can't be upgraded
+def upgrade_val(game, cell, energy_co, gold_co, buildings):
+	# if there is no building, or it can't be upgraded, return 0
+	if cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
+		or cell.building.level == cell.building.tech_level:
+
+		return 0
+	# else, building can be upgraded
+	else:
+		if cell.building.name == "energy_well":
+			return energy_co * natural_energy
+		elif cell.building.name == 'gold_mine':
+			return gold_co * natural_gold
+		else: 
+			return 0
+
 if __name__ == '__main__':
 	main()
