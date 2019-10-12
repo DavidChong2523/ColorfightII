@@ -35,6 +35,7 @@ def play_game(
             energy_co, gold_co = calc_coefficients(game)
             threat_coeffecient = 1
             expansion_coefficient = 1
+            
             # The command list we will send to the server
             cmd_list = []
 
@@ -90,12 +91,12 @@ def play_game(
                         on_edge = True
                         break
                 if on_edge:
-                    edge_cells.append((cell.position.x, cell.position.y))
+                    edge_cells.append(cell)
 
             threat_list = []
             for cell in edge_cells:
-                threat_val = threat(game, game.game_map[cell], gold_co, energy_co, threat_coeffecient)
-                threat_list.append((threat_val, cell))
+                threat_val = threat(game, cell, gold_co, energy_co, threat_coeffecient)
+                threat_list.append((threat_val, cell.position))
 
             build_list = []
             for cell in game.me.cells.values():
@@ -119,10 +120,14 @@ def play_game(
                         game.me.gold -= game.game_map[key[1]].building.upgrade_gold
 
             # Combine the two lists
-            expansion_list = list(sorted(expansion_list, reverse=True))
-            threat_list = list(sorted(threat_list, reverse=True))
-
-            while game.me.energy > 0:
+            ENERGY_MASTER_LIST = threat_list+expansion_list
+            
+            for key in sorted(ENERGY_MASTER_LIST, key=lambda energy: energy[0], reverse=True):
+                if game.game_map[key[1]].owner is game.me.uid and game.me.energy > key[0]*THREAT_SPENDING_CONSTANT:
+                    cmd_list.append(game.attack(key[1], key[0]*THREAT_SPENDING_CONSTANT))
+                elif game.me.energy > game.game_map[key[1]].attack_cost:
+                    cmd_list.append(game.attack(key[1], game.game_map[key[1]].attack_cost))
+            """while game.me.energy > 0:
                 print(threat_list)
                 print(expansion_list)
                 if len(expansion_list) == 0 or threat_list[0][0] >= expansion_list[0][0] :
@@ -132,7 +137,7 @@ def play_game(
                 else:
                     # expand
                     cmd_list.append(game.attack(expansion_list[0][1], game.game_map[expansion_list[0][1]].attack_cost))
-                    expansion_list = expansion_list[1:]
+                    expansion_list = expansion_list[1:]"""
 
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
@@ -291,9 +296,9 @@ def upgrade_val(game, cell, energy_co, gold_co):
     # else, building can be upgraded
     else:
         if(cell.building.name == "energy_well"):
-            return energy_co * natural_energy
+            return energy_co * cell.natural_energy
         elif(cell.building.name == 'gold_mine'):
-            return gold_co * natural_gold
+            return gold_co * cell.natural_gold
         else: 
             return 0
 def general_val(game, cell, energy_co, gold_co):
