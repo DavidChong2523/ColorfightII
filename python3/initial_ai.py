@@ -1,6 +1,7 @@
 from colorfight import Colorfight
 import time
 import random
+import math
 from colorfight.constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_FORTRESS, BUILDING_COST
 def main():
 	game = Colorfight()
@@ -119,16 +120,41 @@ def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficien
                 if(adjacent.is_valid()):
                     sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+1)
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient
-	pass
 
-# value for building fortresses and making self attacks
+# threat level value
 def defense(cell):
+	game_map = game.game_map
+	me = game.me
+
+	value = 0
 	position = cell.position
 	x = position.x
 	y = position.y
 	
-	# check for enemy cells in 5x5
-	for 		
+	# check for enemy cells in 7x7 centered on cell
+	MAX_STEPS_TO_ATTACK = 6
+	for testX in range(x-3, x+4):
+		for testY in range(y-3, y+4):
+			testCell = game_map(testX, testY)
+			if(!testCell.position.isValid()):
+				continue
+
+			# own cell
+			if(testCell.owner == me.uid):
+				continue
+			# empty cell
+			elif(testCell.owner == 0):
+				continue
+			# opponent cell
+			else:
+				dist = testCell.position - position
+				steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+				test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
+				if(test_value > value):
+					value = test_value
+	value /= 6
+	return value
+				
 		
 		
 def build():
