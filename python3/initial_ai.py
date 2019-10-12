@@ -184,7 +184,6 @@ def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_co
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home
 
 def defense(game, cell):
-    """
     game_map = game.game_map
     me = game.me
 
@@ -204,22 +203,20 @@ def defense(game, cell):
                 continue
   
             # own cell
-                   if(testCell.owner == me.uid):
-                          continue
-                        # empty cell
-                        elif(testCell.owner == 0):
-                          continue
-                        # opponent cell
-                        else:
-                          dist = testCell.position - position
-                      steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
-                           test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
-                        if(test_value > value):
-                                value = test_value
+            if(testCell.owner == me.uid):
+                continue
+            # empty cell
+            elif(testCell.owner == 0):
+                continue
+            # opponent cell
+            else:
+                dist = testCell.position - position
+                steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+                test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
+                if(test_value > value):
+                    value = test_value
     value /= 6
     return value
-    """
-    pass
 
 # how threatened cells are from enemy attacks
 def threat(game, cell, energy_co = 1, gold_co = 1, threat_co=1):
