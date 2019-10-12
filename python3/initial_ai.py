@@ -102,8 +102,17 @@ def play_game(
 
 def expansion():
 	pass
-def defense():
-	pass
+
+# value for building fortresses and making self attacks
+def defense(cell):
+	position = cell.position
+	x = position.x
+	y = position.y
+	
+	# check for enemy cells in 5x5
+	for 		
+		
+		
 def build():
 	pass
 def upgrade():
