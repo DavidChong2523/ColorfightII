@@ -10,7 +10,7 @@ def main():
 def play_game(
         game, \
         room     = 'DeepMines', \
-        username = 'DeepMine-v0.0', \
+        username = 'DeepMine-v0.1', \
         password = 'uclaacm', \
         join_key = '12508'):
 	# Connect to the server. This will connect to the public room. If you want to
@@ -42,8 +42,9 @@ def play_game(
             if not game.update_turn():
                 break
 
-            # calculate number of buildings we have
+            # calculate number of buildings and cells we have
             buildings = 0
+            cells = len(game.me.cells.values())
             for cell in game.me.cells.values():
             	if cell.building.name != 'empty':
             		buildings += 1
@@ -55,6 +56,7 @@ def play_game(
                 continue
     
             me = game.me
+            # print(upgrade_val(game, game.game_map[(5, 5)], 1, 1, buildings))
             ### unknown
             
             # Send the command list to the server
@@ -87,11 +89,11 @@ def defense():
 	pass
 def build():
 	pass
-
+t
 # calculates the upgrade value for a cell
 # val = net change in gold rate * gold_co + net change in energy rate * energy_co
 # returns 0 if no building or can't be upgraded
-def upgrade_val(game, cell, energy_co, gold_co, buildings):
+def upgrade_val(game, cell, energy_co, gold_co):
 	# if there is no building, or it can't be upgraded, return 0
 	if cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
 		or cell.building.level == cell.building.tech_level:
