@@ -108,7 +108,6 @@ def expansion(game, cell, gold_coefficient = 40, energy_coefficient = 40, ncost_
                     sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+2)
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient
 
-# threat level value
 def defense(game, cell):
 	game_map = game.game_map
 	me = game.me
@@ -185,6 +184,8 @@ def upgrade_val(game, cell, energy_co, gold_co):
 			return gold_co * natural_gold
 		else: 
 			return 0
+def general_val(game, cell, energy_co, gold_co):
+	return cell.gold * gold_co + cell.energy * energy_co
 
 if __name__ == '__main__':
 	main()
