@@ -107,19 +107,18 @@ def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficien
     ncost_value = cell.attack_cost*ncost_coefficient
     sum1_total = 0
     sum2_total = 0
-    if(distance < 2):
+    if distance < 2:
         position = cell.position
         surrounding = position.get_surrounding_cardinals()
-        for( adjacent in surrounding ):
-            if(adjacent.is_valid()):
+        for adjacent in surrounding:
+            if adjacent.is_valid():
                 sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+1)
-        if(distance == 0):
+        if distance == 0:
             surrounding = position.get_surrounding_cardinals()
-            for( adjacent in surrounding ):
-                if(adjacent.is_valid()):
+            for adjacent in surrounding:
+                if adjacent.is_valid():
                     sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+1)
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient
-	pass
 def defense():
 	pass
 def build():
