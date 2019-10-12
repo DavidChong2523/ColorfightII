@@ -30,10 +30,11 @@ def play_game(
         # This is the game loop
         while True:
 
-        	#########COEFFECIENTS#########
-        	THREAT_SPENDING_CONSTANT = 0.5
-		energy_co, gold_co = calc_coefficients
-        	
+            #########COEFFECIENTS#########
+            THREAT_SPENDING_CONSTANT = 0.5
+            energy_co, gold_co = calc_coefficients(game)
+            threat_coeffecient = 1
+            expansion_coefficient = 1
             # The command list we will send to the server
             cmd_list = []
 
@@ -56,31 +57,13 @@ def play_game(
     
             me = game.me
             game_map = game.game_map
-<<<<<<< HEAD
 
-	    
-            # calculate number of buildings we have
-            buildings = 0
-            for cell in game.me.cells.values():
-            	if cell.building.name != 'empty':
-            		buildings += 1
-=======
         
             # calculate number of buildings we have
             buildings = 0
             for cell in game.me.cells.values():
                 if cell.building.name != 'empty':
                     buildings += 1
-
-            """# get lists
-            defense_list = {}
-            upgrade_list = {}
-            for cell in me.cells.values():
-                defense_list[defense(game, cell)] = cell
-                upgrade_list[upgrade_val(game, cell, energy_co, gold_co, buildings)] = cell"""
-       
-            ### unknown
->>>>>>> 3ea8b3977be99595022861758012d7a8c13e70ed
             
             # expand
             # first val is result, second is position tuple
@@ -112,7 +95,7 @@ def play_game(
             
             threat_list = []
             for cell in edge_cells:
-                threat_val = threat(game, cell, gold_co, energy_co, threat_co)
+                threat_val = threat(game, game.game_map[cell], gold_co, energy_co, threat_coeffecient)
                 threat_list.append(threat_val, threat_list)
 
 
@@ -141,13 +124,13 @@ def play_game(
     game.disconnect()
 
 def calc_coefficients(game):
-	MAX_TURNS = 500
-	turn = game.turn
-	
-	gold_co = turn / MAX_TURNS
-	energy_co = 1 - (turn / MAX_TURNS)
-	return energy_co, gold_co
-	
+    MAX_TURNS = 500
+    turn = game.turn
+    
+    gold_co = turn / MAX_TURNS
+    energy_co = 1 - (turn / MAX_TURNS)
+    return energy_co, gold_co
+    
 
 def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
     map = game.game_map
@@ -223,6 +206,8 @@ def threat(game, cell, energy_co = 1, gold_co = 1, threat_co=1):
     cell_value = general_val(game, cell, energy_co, gold_co)
     value = 0
     position = cell.position
+    x = position.x
+    y = position.y
 
     # check for enemy cells in 5x5 centered on cell
     MAX_STEPS_TO_ATTACK = 4
