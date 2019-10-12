@@ -63,7 +63,8 @@ def play_game(
             for cell in game.me.cells.values():
                 if cell.building.name != 'empty':
                     buildings += 1
-            
+
+
             # expand
             # first val is result, second is position tuple
             expansion_list = []
@@ -286,7 +287,7 @@ def build(game, cell, energy_co, gold_co):
 def upgrade_val(game, cell, energy_co, gold_co):
     # if there is no building, or it can't be upgraded, return 0
     if(cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
-        or cell.building.level == game.me.tech_level):
+        or (cell.building.level == game.me.tech_level and not cell.is_home)):
         return 0
     # else, building can be upgraded
     else:
@@ -294,6 +295,8 @@ def upgrade_val(game, cell, energy_co, gold_co):
             return energy_co * natural_energy
         elif(cell.building.name == 'gold_mine'):
             return gold_co * natural_gold
+        elif(cell.is_home):
+            return 2
         else: 
             return 0
 def general_val(game, cell, energy_co, gold_co):
