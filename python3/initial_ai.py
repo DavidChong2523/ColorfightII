@@ -7,7 +7,6 @@ def main():
 	game = Colorfight()
 	play_game(game)
 
-
 def play_game(
         game, \
         room     = 'DeepMines', \
@@ -43,22 +42,44 @@ def play_game(
             if not game.update_turn():
                 break
 
-            # calculate number of buildings and cells we have
-            buildings = 0
-            cells = len(game.me.cells.values())
-            for cell in game.me.cells.values():
-            	if cell.building.name != 'empty':
-            		buildings += 1
-
             # Check if you exist in the game. If not, wait for the next round.
             # You may not appear immediately after you join. But you should be 
             # in the game after one round.
             if game.me == None:
                 continue
-    
+	
             me = game.me
-            # print(upgrade_val(game, game.game_map[(5, 5)], 1, 1, buildings))
+
+            game_map = game.game_map
+	    
+            # calculate number of buildings we have
+            buildings = 0
+            for cell in game.me.cells.values():
+            	if cell.building.name != 'empty':
+            		buildings += 1
+
+            """# get lists
+            defense_list = {}
+            upgrade_list = {}
+            for cell in me.cells.values():
+                defense_list[defense(game, cell)] = cell
+                upgrade_list[upgrade_val(game, cell, energy_co, gold_co, buildings)] = cell"""
+	   
             ### unknown
+            
+            # expand
+            expansion_list = []
+            for cell in game.me.cells.values():
+                surrounding = cell.position.get_surrounding_cardinals()
+                for adjacent in surrounding:
+                    if game.game_map[adjacent].owner is not game.me.uid and game.game_map[adjacent].position.is_valid():
+                        expansion_list.append((expansion(game, game.game_map[adjacent]), adjacent))
+            for key in sorted(expansion_list, key=lambda expansion: expansion[0], reverse=True):
+                if game.me.energy > game.game_map[key[1]].attack_cost:
+                    cmd_list.append(game.attack(key[1], game.game_map[key[1]].attack_cost))
+                    game.me.energy -= game.game_map[key[1]].attack_cost
+                else:
+                    break
             
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
@@ -67,7 +88,7 @@ def play_game(
     # Do this to release all the allocated resources. 
     game.disconnect()
 
-def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance = 0):
+def expansion(game, cell, gold_coefficient = 40, energy_coefficient = 40, ncost_coefficient = 0.1, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
     map = game.game_map
     gold_value = cell.natural_gold*gold_coefficient
     energy_value = cell.natural_energy*energy_coefficient
@@ -78,18 +99,16 @@ def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficien
         position = cell.position
         surrounding = position.get_surrounding_cardinals()
         for adjacent in surrounding:
-            if adjacent.is_valid():
+            if adjacent.is_valid() and map[adjacent].owner is not game.me.uid:
                 sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+1)
         if distance == 0:
             surrounding = position.get_surrounding_cardinals()
             for adjacent in surrounding:
-                if adjacent.is_valid():
+                if adjacent.is_valid() and map[adjacent].owner is not game.me.uid:
                     sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+2)
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient
 
-# threat level value
-# TODO include value of cell
-def defense(cell):
+def defense(game, cell):
 	game_map = game.game_map
 	me = game.me
 
@@ -100,25 +119,26 @@ def defense(cell):
 	
 	# check for enemy cells in 7x7 centered on cell
 	MAX_STEPS_TO_ATTACK = 6
-	for testX in range(x-3, x+4):
+	"""for testX in range(x-3, x+4):
 		for testY in range(y-3, y+4):
-			testCell = game_map(testX, testY)
-			if(!testCell.position.isValid()):
-				continue
+            if testX<game_map.width and testY<game_map.height and testX>=0 and testY>=0:
+                testCell = game_map[pos]
+                if not testCell.position.is_valid():
+                    continue
 
-			# own cell
-			if(testCell.owner == me.uid):
-				continue
-			# empty cell
-			elif(testCell.owner == 0):
-				continue
-			# opponent cell
-			else:
-				dist = testCell.position - position
-				steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
-				test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
-				if(test_value > value):
-					value = test_value
+                # own cell
+                if(testCell.owner == me.uid):
+                    continue
+                # empty cell
+                elif(testCell.owner == 0):
+                    continue
+                # opponent cell
+                else:
+                    dist = testCell.position - position
+                    steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+                    test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
+                    if(test_value > value):
+                        value = test_value"""
 	value /= 6
 	return value
 
@@ -153,15 +173,14 @@ def build(game, cell, energy_co, gold_co):
 # returns 0 if no building or can't be upgraded
 def upgrade_val(game, cell, energy_co, gold_co):
 	# if there is no building, or it can't be upgraded, return 0
-	if cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
-		or cell.building.level == cell.building.tech_level:
-
+	if(cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
+		or cell.building.level == cell.building.tech_level):
 		return 0
 	# else, building can be upgraded
 	else:
-		if cell.building.name == "energy_well":
+		if(cell.building.name == "energy_well"):
 			return energy_co * natural_energy
-		elif cell.building.name == 'gold_mine':
+		elif(cell.building.name == 'gold_mine'):
 			return gold_co * natural_gold
 		else: 
 			return 0
