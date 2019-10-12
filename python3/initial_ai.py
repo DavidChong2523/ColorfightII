@@ -120,9 +120,32 @@ def defense(cell):
 					value = test_value
 	value /= 6
 	return value
-	
-def build():
-	pass
+
+# returns best building option for the cell in the form of the build character
+def best_build(game, cell, energy_co, gold_co):
+	# return 0 if the cell isn't empty
+	if cell.building.name != 'empty':
+		return 0
+	else:
+		# return the better option of the two
+		energy_well_val = cell.natural_energy * 2
+		gold_mine_val = cell.natural_gold * 2
+		if energy_well_val > gold_mine_val:
+			return BLD_ENERGY_WELL
+		else:
+			return BLD_GOLD_MINE
+
+# returns the value of building in a given cell
+def build(game, cell, energy_co, gold_co):
+	# if there is a building in the cell, do nothing
+	if cell.building.name != 'empty':
+		return 0
+	else:
+		# two options are well or mine, and return the greatest
+		energy_well_val = cell.natural_energy * 2
+		gold_mine_val = cell.natural_gold * 2
+		return max(energy_well_val, gold_mine_val)
+
 
 # calculates the upgrade value for a cell
 # val = net change in gold rate * gold_co + net change in energy rate * energy_co
