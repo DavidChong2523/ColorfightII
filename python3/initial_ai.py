@@ -80,7 +80,7 @@ def play_game(
                     game.me.energy -= game.game_map[key[1]].attack_cost
                 else:
                     break
-            
+           
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
             print(result)
