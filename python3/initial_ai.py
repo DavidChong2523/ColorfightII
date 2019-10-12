@@ -57,7 +57,6 @@ def play_game(
     
             me = game.me
             game_map = game.game_map
-
         
             # calculate number of buildings we have
             buildings = 0
@@ -98,9 +97,26 @@ def play_game(
                 threat_val = threat(game, game.game_map[cell], gold_co, energy_co, threat_coeffecient)
                 threat_list.append(threat_val, threat_list)
 
-
+            build_list = []
+            for cell in game.me.cells.values():
+                build_list.append((build(game, cell, 1, 1), cell.position))
+            upgrade_list = []
+            for cell in game.me.cells.values():
+                upgrade_list.append((upgrade_val(game, cell, 1, 1), cell.position))
+            
             # master lists for commands
             GOLD_MASTER_LIST = []
+            
+            GOLD_MASTER_LIST = build_list+upgrade_list
+            for key in sorted(GOLD_MASTER_LIST, key=lambda gold: gold[0], reverse=True):
+                if game.game_map[key[1]].is_empty:
+                    cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
+                elif game.game_map[key[1]].building.can_upgrade :
+                    print('Gold: ' + str(game.game_map[key[1]].building.upgrade_gold))
+                    print('Energy: ' + str(game.game_map[key[1]].building.upgrade_energy))
+                    if game.game_map[key[1]].building.upgrade_gold < game.me.gold :
+                        cmd_list.append(game.upgrade(game.game_map[key[1]].position))
+                        game.me.gold -= game.game_map[key[1]].building.upgrade_gold
 
             # Combine the two lists
             expansion_list = list(sorted(expansion_list, reverse=True))
@@ -158,7 +174,7 @@ def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_co
     if homePos is not 0:
         home = ((homePos.x-cell.position.x)**2+(homePos.y-cell.position.y)**2)**0.5
 
-    return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home*10
+    return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home
 
 def defense(game, cell):
     """
@@ -268,7 +284,7 @@ def build(game, cell, energy_co, gold_co):
 def upgrade_val(game, cell, energy_co, gold_co):
     # if there is no building, or it can't be upgraded, return 0
     if(cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
-        or cell.building.level == cell.building.tech_level):
+        or cell.building.level == game.me.tech_level):
         return 0
     # else, building can be upgraded
     else:
