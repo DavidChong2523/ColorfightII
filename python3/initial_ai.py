@@ -100,7 +100,7 @@ def play_game(
     # Do this to release all the allocated resources. 
     game.disconnect()
 
-def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance):
+def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance = 0):
     map = game.game_map
     gold_value = cell.natural_gold*gold_coefficient
     energy_value = cell.natural_energy*energy_coefficient
@@ -117,7 +117,7 @@ def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficien
             surrounding = position.get_surrounding_cardinals()
             for adjacent in surrounding:
                 if adjacent.is_valid():
-                    sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+1)
+                    sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+2)
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient
 def defense():
 	pass
