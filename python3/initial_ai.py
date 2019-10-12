@@ -10,7 +10,7 @@ def main():
 def play_game(
         game, \
         room     = 'DeepMines', \
-        username = 'DeepMine-v0.2', \
+        username = 'DeepMine-v0.3', \
         password = 'uclaacm', \
         join_key = '12508'):
 	# Connect to the server. This will connect to the public room. If you want to
@@ -96,7 +96,7 @@ def play_game(
     # Do this to release all the allocated resources. 
     game.disconnect()
 
-def expansion(game, cell, gold_coefficient = 40, energy_coefficient = 40, ncost_coefficient = 0.1, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
+def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
     map = game.game_map
     gold_value = cell.natural_gold*gold_coefficient
     energy_value = cell.natural_energy*energy_coefficient
@@ -114,7 +114,15 @@ def expansion(game, cell, gold_coefficient = 40, energy_coefficient = 40, ncost_
             for adjacent in surrounding:
                 if adjacent.is_valid() and map[adjacent].owner is not game.me.uid:
                     sum1_total+=expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficient, sum1_coefficient, sum2_coefficient, expansion_coefficient, distance+2)
-    return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient
+    home = 0
+    homePos = 0
+    for myCell in game.me.cells.values():
+        if myCell.is_home:
+            homePos = myCell.position
+    if homePos is not 0:
+        home = ((homePos.x-cell.position.x)**2+(homePos.y-cell.position.y)**2)**0.5
+
+    return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home*10
 
 def defense(game, cell):
 	game_map = game.game_map
