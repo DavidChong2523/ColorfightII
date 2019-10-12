@@ -4,16 +4,16 @@ import random
 import math
 from colorfight.constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_FORTRESS, BUILDING_COST
 def main():
-	game = Colorfight()
-	play_game(game)
+    game = Colorfight()
+    play_game(game)
 
 def play_game(
         game, \
         room     = 'DeepMines', \
-        username = 'DeepMine-v0.3', \
+        username = 'DeepMine-v0.5', \
         password = 'uclaacm', \
         join_key = '12508'):
-	# Connect to the server. This will connect to the public room. If you want to
+    # Connect to the server. This will connect to the public room. If you want to
     # join other rooms, you need to change the argument
     game.connect(room = room)
 
@@ -27,14 +27,15 @@ def play_game(
     if game.register(username = username, \
             password = password, join_key = join_key):
 
-		# This is the game loop
+        # This is the game loop
         while True:
 
-        	#########COEFFECIENTS#########
-        	THREAT_SPENDING_CONSTANT = 0.5
-        	
+            #########COEFFECIENTS#########
+            THREAT_SPENDING_CONSTANT = 0.5
+            
             # The command list we will send to the server
             cmd_list = []
+
             # The list of cells that we want to attack
             my_attack_list = []
             # update_turn() is required to get the latest information from the
@@ -51,16 +52,16 @@ def play_game(
             # in the game after one round.
             if game.me == None:
                 continue
-	
+    
             me = game.me
 
             game_map = game.game_map
-	    
+        
             # calculate number of buildings we have
             buildings = 0
             for cell in game.me.cells.values():
-            	if cell.building.name != 'empty':
-            		buildings += 1
+                if cell.building.name != 'empty':
+                    buildings += 1
 
             """# get lists
             defense_list = {}
@@ -68,7 +69,7 @@ def play_game(
             for cell in me.cells.values():
                 defense_list[defense(game, cell)] = cell
                 upgrade_list[upgrade_val(game, cell, energy_co, gold_co, buildings)] = cell"""
-	   
+       
             ### unknown
             
             # expand
@@ -79,29 +80,30 @@ def play_game(
                 for adjacent in surrounding:
                     if game.game_map[adjacent].owner is not game.me.uid and game.game_map[adjacent].position.is_valid():
                         expansion_list.append((expansion(game, game.game_map[adjacent]), adjacent))
+            '''
             for key in sorted(expansion_list, key=lambda expansion: expansion[0], reverse=True):
                 if game.me.energy > game.game_map[key[1]].attack_cost:
                     cmd_list.append(game.attack(key[1], game.game_map[key[1]].attack_cost))
                     game.me.energy -= game.game_map[key[1]].attack_cost
                 else:
                     break
-                    
+            '''
             # finds threat values of all values on the edge of our fort
             edge_cells = []
             for cell in game.me.cells.values():
-            	surrounding = cell.position.get_surrounding_cardinals()
-            	on_edge = False
-            	for pos in surrounding:
-            		if game.game_map[pos].owner is not game.me.uid:
-            			on_edge = True
-            			break
-            	if on_edge:
-            		edge_cells.append((cell.position.x, cell.position.y))
+                surrounding = cell.position.get_surrounding_cardinals()
+                on_edge = False
+                for pos in surrounding:
+                    if game.game_map[pos].owner is not game.me.uid:
+                        on_edge = True
+                        break
+                if on_edge:
+                    edge_cells.append((cell.position.x, cell.position.y))
             
             threat_list = []
             for cell in edge_cells:
-            	threat = threat(game, cell, gold_co, energy_co, threat_co)
-            	threat_list.append(threat, threat_list)
+                threat_val = threat(game, cell, gold_co, energy_co, threat_co)
+                threat_list.append(threat_val, threat_list)
 
 
             # master lists for commands
@@ -112,14 +114,14 @@ def play_game(
             threat_list = list(sorted(threat_list, reverse=True))
 
             while game.me.energy > 0:
-            	if threat_list[0][0] >= expansion_list[0][0]:
-            		# attack own cell
-            		cmd_list.append(game.attack(threat_list[0][1], threat_list[0][0] * THREAT_SPENDING_CONSTANT))
-            		threat_list = threat_list[1:]
-            	else:
-            		# expand
-            		cmd_list.append(game.attack(expansion_list[0][1], game.game_map[expansion_list[0][1]].attack_cost))
-            		expansion_list = expansion_list[1:]
+                if threat_list[0][0] >= expansion_list[0][0]:
+                    # attack own cell
+                    cmd_list.append(game.attack(threat_list[0][1], threat_list[0][0] * THREAT_SPENDING_CONSTANT))
+                    threat_list = threat_list[1:]
+                else:
+                    # expand
+                    cmd_list.append(game.attack(expansion_list[0][1], game.game_map[expansion_list[0][1]].attack_cost))
+                    expansion_list = expansion_list[1:]
 
 
             # Send the command list to the server
@@ -158,123 +160,123 @@ def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_co
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home*10
 
 def defense(game, cell):
-	"""
-	game_map = game.game_map
-	me = game.me
+    """
+    game_map = game.game_map
+    me = game.me
 
-	value = 0
-	position = cell.position
-	x = position.x
-	y = position.y
-	
-	# check for enemy cells in 7x7 centered on cell
-	MAX_STEPS_TO_ATTACK = 6
-	for testX in range(x-3, x+4):
-		for testY in range(y-3, y+4):
-			if(testX < game_map.width and testX >= 0 and \
-			   testY < game_map.height and testY >= 0):
-				testCell = game_map[(testX, testY)]
-			else:
-				continue
+    value = 0
+    position = cell.position
+    x = position.x
+    y = position.y
+    
+    # check for enemy cells in 7x7 centered on cell
+    MAX_STEPS_TO_ATTACK = 6
+    for testX in range(x-3, x+4):
+        for testY in range(y-3, y+4):
+            if(testX < game_map.width and testX >= 0 and \
+               testY < game_map.height and testY >= 0):
+                testCell = game_map[(testX, testY)]
+            else:
+                continue
   
-			# own cell
-  	     		if(testCell.owner == me.uid):
-  	                	continue
-  	              	# empty cell
-  	              	elif(testCell.owner == 0):
-  	                	continue
-  	              	# opponent cell
-  	              	else:
-  	                	dist = testCell.position - position
-  		        	steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
-       	        		test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
-        	        	if(test_value > value):
-        	                	value = test_value
-	value /= 6
-	return value
-	"""
-	pass
+            # own cell
+                   if(testCell.owner == me.uid):
+                          continue
+                        # empty cell
+                        elif(testCell.owner == 0):
+                          continue
+                        # opponent cell
+                        else:
+                          dist = testCell.position - position
+                      steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+                           test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
+                        if(test_value > value):
+                                value = test_value
+    value /= 6
+    return value
+    """
+    pass
 
 # how threatened cells are from enemy attacks
-def threat(game, cell, energy_co, gold_co, threat_co=1):
-	game_map = game.game_map
-	me = game.me
+def threat(game, cell, energy_co = 1, gold_co = 1, threat_co=1):
+    game_map = game.game_map
+    me = game.me
 
-	cell_value = general_val(game, cell, energy_co, gold_co)
-	value = 0
-	position = cell.position
+    cell_value = general_val(game, cell, energy_co, gold_co)
+    value = 0
+    position = cell.position
 
-	# check for enemy cells in 5x5 centered on cell
-	MAX_STEPS_TO_ATTACK = 4
-	for testX in range(x-2, x+3):
-		for testY in range(y-2, y+3):
-			if(testX < game_map.width and testX >= 0 and \
-			   testY < game_map.height and testY >= 0):
-				testCell = game_map[(testX, testY)]
-			else:
-				continue
-			  
-			# own cell
-			if(testCell.owner == me.uid):
-				continue
-  	              	# empty cell
-			elif(testCell.owner == 0):
-				continue
-  	              	# opponent cell
-			else:
-				dist = testCell.position - position
-				steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
-				test_value = (MAX_STEPS_TO_ATTACK / steps_to_attack)
-				if(test_value > value):
-					value = test_value
-	value = value * cell_value
-	return value
-	
+    # check for enemy cells in 5x5 centered on cell
+    MAX_STEPS_TO_ATTACK = 4
+    for testX in range(x-2, x+3):
+        for testY in range(y-2, y+3):
+            if(testX < game_map.width and testX >= 0 and \
+               testY < game_map.height and testY >= 0):
+                testCell = game_map[(testX, testY)]
+            else:
+                continue
+              
+            # own cell
+            if(testCell.owner == me.uid):
+                continue
+                        # empty cell
+            elif(testCell.owner == 0):
+                continue
+                        # opponent cell
+            else:
+                dist = testCell.position - position
+                steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+                test_value = (MAX_STEPS_TO_ATTACK / steps_to_attack)
+                if(test_value > value):
+                    value = test_value
+    value = value * cell_value
+    return value
+    
 
 # returns best building option for the cell in the form of the build character
 def best_build(game, cell, energy_co, gold_co):
-	# return 0 if the cell isn't empty
-	if cell.building.name != 'empty':
-		return 0
-	else:
-		# return the better option of the two
-		energy_well_val = cell.natural_energy * 2
-		gold_mine_val = cell.natural_gold * 2
-		if energy_well_val > gold_mine_val:
-			return BLD_ENERGY_WELL
-		else:
-			return BLD_GOLD_MINE
+    # return 0 if the cell isn't empty
+    if cell.building.name != 'empty':
+        return 0
+    else:
+        # return the better option of the two
+        energy_well_val = cell.natural_energy * 2
+        gold_mine_val = cell.natural_gold * 2
+        if energy_well_val > gold_mine_val:
+            return BLD_ENERGY_WELL
+        else:
+            return BLD_GOLD_MINE
 
 # returns the value of building in a given cell
 def build(game, cell, energy_co, gold_co):
-	# if there is a building in the cell, do nothing
-	if cell.building.name != 'empty':
-		return 0
-	else:
-		# two options are well or mine, and return the greatest
-		energy_well_val = cell.natural_energy * 2
-		gold_mine_val = cell.natural_gold * 2
-		return max(energy_well_val, gold_mine_val)
+    # if there is a building in the cell, do nothing
+    if cell.building.name != 'empty':
+        return 0
+    else:
+        # two options are well or mine, and return the greatest
+        energy_well_val = cell.natural_energy * 2
+        gold_mine_val = cell.natural_gold * 2
+        return max(energy_well_val, gold_mine_val)
 
 
 # calculates the upgrade value for a cell
 # val = net change in gold rate * gold_co + net change in energy rate * energy_co
 # returns 0 if no building or can't be upgraded
 def upgrade_val(game, cell, energy_co, gold_co):
-	# if there is no building, or it can't be upgraded, return 0
-	if(cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
-		or cell.building.level == cell.building.tech_level):
-		return 0
-	# else, building can be upgraded
-	else:
-		if(cell.building.name == "energy_well"):
-			return energy_co * natural_energy
-		elif(cell.building.name == 'gold_mine'):
-			return gold_co * natural_gold
-		else: 
-			return 0
+    # if there is no building, or it can't be upgraded, return 0
+    if(cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
+        or cell.building.level == cell.building.tech_level):
+        return 0
+    # else, building can be upgraded
+    else:
+        if(cell.building.name == "energy_well"):
+            return energy_co * natural_energy
+        elif(cell.building.name == 'gold_mine'):
+            return gold_co * natural_gold
+        else: 
+            return 0
 def general_val(game, cell, energy_co, gold_co):
-	return cell.gold * gold_co + cell.energy * energy_co
+    return cell.gold * gold_co + cell.energy * energy_co
 
 if __name__ == '__main__':
-	main()
+    main()
