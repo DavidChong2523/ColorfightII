@@ -10,7 +10,7 @@ def main():
 def play_game(
         game, \
         room     = 'DeepMines', \
-        username = 'DeepMine-v0.1', \
+        username = 'DeepMine-v0.2', \
         password = 'uclaacm', \
         join_key = '12508'):
 	# Connect to the server. This will connect to the public room. If you want to
@@ -68,6 +68,7 @@ def play_game(
             ### unknown
             
             # expand
+            # first val is result, second is position tuple
             expansion_list = []
             for cell in game.me.cells.values():
                 surrounding = cell.position.get_surrounding_cardinals()
@@ -81,6 +82,13 @@ def play_game(
                 else:
                     break
             
+            # master lists for commands
+            ENERGY_MASTER_LIST = []
+            GOLD_MASTER_LIST = []
+
+            # 
+            ENERGY_MASTER_LIST += 
+            threat_list
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
             print(result)
