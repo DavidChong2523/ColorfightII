@@ -49,23 +49,15 @@ def play_game(
                 continue
 	
             me = game.me
-
             game_map = game.game_map
+	    energy_co, gold_co = calc_coefficients
+
 	    
             # calculate number of buildings we have
             buildings = 0
             for cell in game.me.cells.values():
             	if cell.building.name != 'empty':
             		buildings += 1
-
-            """# get lists
-            defense_list = {}
-            upgrade_list = {}
-            for cell in me.cells.values():
-                defense_list[defense(game, cell)] = cell
-                upgrade_list[upgrade_val(game, cell, energy_co, gold_co, buildings)] = cell"""
-	   
-            ### unknown
             
             # expand
             # first val is result, second is position tuple
@@ -86,16 +78,21 @@ def play_game(
             ENERGY_MASTER_LIST = []
             GOLD_MASTER_LIST = []
 
-            # 
-            ENERGY_MASTER_LIST += 
-            threat_list
-
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
             print(result)
 
     # Do this to release all the allocated resources. 
     game.disconnect()
+
+def calc_coefficients(game):
+	MAX_TURNS = 500
+	turn = game.turn
+	
+	gold_co = turn / MAX_TURNS
+	energy_co = 1 - (turn / MAX_TURNS)
+	return energy_co, gold_co
+	
 
 def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
     map = game.game_map
