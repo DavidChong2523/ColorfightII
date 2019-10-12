@@ -7,7 +7,6 @@ def main():
 	game = Colorfight()
 	play_game(game)
 
-
 def play_game(
         game, \
         room     = 'DeepMines', \
@@ -43,21 +42,33 @@ def play_game(
             if not game.update_turn():
                 break
 
+            # Check if you exist in the game. If not, wait for the next round.
+            # You may not appear immediately after you join. But you should be 
+            # in the game after one round.
+            if game.me == None:
+                continue
+	
+            me = game.me
+	    game_map = game.game_map
+	    
             # calculate number of buildings we have
             buildings = 0
             for cell in game.me.cells.values():
             	if cell.building.name != 'empty':
             		buildings += 1
 
-            # Check if you exist in the game. If not, wait for the next round.
-            # You may not appear immediately after you join. But you should be 
-            # in the game after one round.
-            if game.me == None:
-                continue
-    
-            me = game.me
-            ### unknown
-            
+	    # get lists
+	    defense_list = {}
+	    upgrade_list = {}
+	    for cell in me.cells:
+		defense_list[defense(game, cell)] = cell
+		upgrade_list[upgrade_val(game, cell, energy_co, gold_co, buildings)] = cell
+	   
+	
+	    
+
+	    
+            	
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
             print(result)
@@ -86,7 +97,7 @@ def expansion(game, cell, gold_coefficient, energy_coefficient, ncost_coefficien
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient
 
 # threat level value
-def defense(cell):
+def defense(game, cell):
 	game_map = game.game_map
 	me = game.me
 
@@ -127,15 +138,14 @@ def build():
 # returns 0 if no building or can't be upgraded
 def upgrade_val(game, cell, energy_co, gold_co, buildings):
 	# if there is no building, or it can't be upgraded, return 0
-	if cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
-		or cell.building.level == cell.building.tech_level:
-
+	if(cell.building.name == 'empty' or cell.building.level == cell.building.max_level \
+		or cell.building.level == cell.building.tech_level):
 		return 0
 	# else, building can be upgraded
 	else:
-		if cell.building.name == "energy_well":
+		if(cell.building.name == "energy_well"):
 			return energy_co * natural_energy
-		elif cell.building.name == 'gold_mine':
+		elif(cell.building.name == 'gold_mine'):
 			return gold_co * natural_gold
 		else: 
 			return 0
