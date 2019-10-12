@@ -89,7 +89,7 @@ def defense():
 	pass
 def build():
 	pass
-t
+
 # calculates the upgrade value for a cell
 # val = net change in gold rate * gold_co + net change in energy rate * energy_co
 # returns 0 if no building or can't be upgraded
