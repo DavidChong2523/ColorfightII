@@ -58,7 +58,7 @@ def play_game(
                     # We also try to keep our cell number under 100 to avoid tax
                     if c.attack_cost < me.energy and c.owner != game.uid \
                             and c.position not in my_attack_list \
-                            and len(me.cells) < 95:
+                            and len(me.cells) < 900:
                         # Add the attack command in the command list
                         # Subtract the attack cost manually so I can keep track
                         # of the energy I have.
