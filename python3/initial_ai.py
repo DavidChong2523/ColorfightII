@@ -85,7 +85,7 @@ def play_game(
                     game.me.energy -= game.game_map[key[1]].attack_cost
                 else:
                     break
-            
+                    
             # finds threat values of all values on the edge of our fort
             edge_cells = []
             for cell in game.me.cells.values():
@@ -102,7 +102,6 @@ def play_game(
             for cell in edge_cells:
             	threat = threat(game, cell, gold_co, energy_co, threat_co)
             	threat_list.append(threat, threat_list)
-
 
 
             # master lists for commands
@@ -159,6 +158,7 @@ def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_co
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home*10
 
 def defense(game, cell):
+	"""
 	game_map = game.game_map
 	me = game.me
 
@@ -169,28 +169,67 @@ def defense(game, cell):
 	
 	# check for enemy cells in 7x7 centered on cell
 	MAX_STEPS_TO_ATTACK = 6
-	"""for testX in range(x-3, x+4):
+	for testX in range(x-3, x+4):
 		for testY in range(y-3, y+4):
-            if testX<game_map.width and testY<game_map.height and testX>=0 and testY>=0:
-                testCell = game_map[pos]
-                if not testCell.position.is_valid():
-                    continue
-
-                # own cell
-                if(testCell.owner == me.uid):
-                    continue
-                # empty cell
-                elif(testCell.owner == 0):
-                    continue
-                # opponent cell
-                else:
-                    dist = testCell.position - position
-                    steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
-                    test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
-                    if(test_value > value):
-                        value = test_value"""
+			if(testX < game_map.width and testX >= 0 and \
+			   testY < game_map.height and testY >= 0):
+				testCell = game_map[(testX, testY)]
+			else:
+				continue
+  
+			# own cell
+  	     		if(testCell.owner == me.uid):
+  	                	continue
+  	              	# empty cell
+  	              	elif(testCell.owner == 0):
+  	                	continue
+  	              	# opponent cell
+  	              	else:
+  	                	dist = testCell.position - position
+  		        	steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+       	        		test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
+        	        	if(test_value > value):
+        	                	value = test_value
 	value /= 6
 	return value
+	"""
+	pass
+
+# how threatened cells are from enemy attacks
+def threat(game, cell, energy_co, gold_co, threat_co=1):
+	game_map = game.game_map
+	me = game.me
+
+	cell_value = general_val(game, cell, energy_co, gold_co)
+	value = 0
+	position = cell.position
+
+	# check for enemy cells in 5x5 centered on cell
+	MAX_STEPS_TO_ATTACK = 4
+	for testX in range(x-2, x+3):
+		for testY in range(y-2, y+3):
+			if(testX < game_map.width and testX >= 0 and \
+			   testY < game_map.height and testY >= 0):
+				testCell = game_map[(testX, testY)]
+			else:
+				continue
+			  
+			# own cell
+			if(testCell.owner == me.uid):
+				continue
+  	              	# empty cell
+			elif(testCell.owner == 0):
+				continue
+  	              	# opponent cell
+			else:
+				dist = testCell.position - position
+				steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+				test_value = (MAX_STEPS_TO_ATTACK / steps_to_attack)
+				if(test_value > value):
+					value = test_value
+	value = value * cell_value
+	return value
+	
 
 # returns best building option for the cell in the form of the build character
 def best_build(game, cell, energy_co, gold_co):
