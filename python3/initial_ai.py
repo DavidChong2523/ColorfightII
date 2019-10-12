@@ -103,13 +103,16 @@ def play_game(
             for cell in game.me.cells.values():
                 build_list.append((build(game, cell, 1, 1), cell.position))
             upgrade_list = []
+            defense_list = []
             for cell in game.me.cells.values():
                 upgrade_list.append((upgrade_val(game, cell, 1, 1), cell.position))
+                defense_list.append((defense(game, cell, energy_co, gold_co), cell.position))
+		    
             
             # master lists for commands
             GOLD_MASTER_LIST = []
             
-            GOLD_MASTER_LIST = build_list+upgrade_list
+            GOLD_MASTER_LIST = build_list+upgrade_list+defense_list
             for key in sorted(GOLD_MASTER_LIST, key=lambda gold: gold[0], reverse=True):
                 if game.game_map[key[1]].is_empty:
                     cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
@@ -153,7 +156,8 @@ def calc_coefficients(game):
     
     gold_co = turn / MAX_TURNS
     energy_co = 1 - (turn / MAX_TURNS)
-    return energy_co, gold_co
+    return 1, 1
+    #return energy_co, gold_co
     
 
 def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
@@ -184,12 +188,12 @@ def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_co
 
     return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home
 
-def defense(game, cell):
-    """
+def defense(game, cell, energy_co, gold_co):
     game_map = game.game_map
     me = game.me
 
     value = 0
+    cell_val = general_val(game, cell, energy_co, gold_co)
     position = cell.position
     x = position.x
     y = position.y
@@ -205,22 +209,21 @@ def defense(game, cell):
                 continue
   
             # own cell
-                   if(testCell.owner == me.uid):
-                          continue
-                        # empty cell
-                        elif(testCell.owner == 0):
-                          continue
-                        # opponent cell
-                        else:
-                          dist = testCell.position - position
-                      steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
-                           test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
-                        if(test_value > value):
-                                value = test_value
+            if(testCell.owner == me.uid):
+                continue
+            # empty cell
+            elif(testCell.owner == 0):
+                continue
+            # opponent cell
+            else:
+                dist = testCell.position - position
+                steps_to_attack = abs(dist.x) + abs(dist.y)
+                test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
+                if(test_value > value):
+                    value = test_value
     value /= 6
+    value *= cell_val
     return value
-    """
-    pass
 
 # how threatened cells are from enemy attacks
 def threat(game, cell, energy_co = 1, gold_co = 1, threat_co=1):
