@@ -10,7 +10,7 @@ def main():
 def play_game(
         game, \
         room     = 'DeepMines', \
-        username = 'DeepMine-v0.5', \
+        username = 'DeepMine-v0.6', \
         password = 'uclaacm', \
         join_key = '12508'):
     # Connect to the server. This will connect to the public room. If you want to
@@ -91,11 +91,11 @@ def play_game(
                         break
                 if on_edge:
                     edge_cells.append((cell.position.x, cell.position.y))
-            
+
             threat_list = []
             for cell in edge_cells:
                 threat_val = threat(game, game.game_map[cell], gold_co, energy_co, threat_coeffecient)
-                threat_list.append(threat_val, threat_list)
+                threat_list.append((threat_val, cell))
 
             build_list = []
             for cell in game.me.cells.values():
@@ -123,7 +123,9 @@ def play_game(
             threat_list = list(sorted(threat_list, reverse=True))
 
             while game.me.energy > 0:
-                if threat_list[0][0] >= expansion_list[0][0]:
+                print(threat_list)
+                print(expansion_list)
+                if len(expansion_list) == 0 or threat_list[0][0] >= expansion_list[0][0] :
                     # attack own cell
                     cmd_list.append(game.attack(threat_list[0][1], threat_list[0][0] * THREAT_SPENDING_CONSTANT))
                     threat_list = threat_list[1:]
@@ -244,7 +246,7 @@ def threat(game, cell, energy_co = 1, gold_co = 1, threat_co=1):
                         # opponent cell
             else:
                 dist = testCell.position - position
-                steps_to_attack = math.abs(dist[0]) + math.abs(dist[1])
+                steps_to_attack = abs(dist.x) + abs(dist.y)
                 test_value = (MAX_STEPS_TO_ATTACK / steps_to_attack)
                 if(test_value > value):
                     value = test_value
