@@ -29,6 +29,10 @@ def play_game(
 
 		# This is the game loop
         while True:
+
+        	#########COEFFECIENTS#########
+        	THREAT_SPENDING_CONSTANT = 0.5
+        	
             # The command list we will send to the server
             cmd_list = []
             # The list of cells that we want to attack
@@ -82,13 +86,43 @@ def play_game(
                 else:
                     break
             
+            # finds threat values of all values on the edge of our fort
+            edge_cells = []
+            for cell in game.me.cells.values():
+            	surrounding = cell.position.get_surrounding_cardinals()
+            	on_edge = False
+            	for pos in surrounding:
+            		if game.game_map[pos].owner is not game.me.uid:
+            			on_edge = True
+            			break
+            	if on_edge:
+            		edge_cells.append((cell.position.x, cell.position.y))
+            
+            threat_list = []
+            for cell in edge_cells:
+            	threat = threat(game, cell, gold_co, energy_co, threat_co)
+            	threat_list.append(threat, threat_list)
+
+
+
             # master lists for commands
-            ENERGY_MASTER_LIST = []
             GOLD_MASTER_LIST = []
 
-            # 
-            ENERGY_MASTER_LIST += 
-            threat_list
+            # Combine the two lists
+            expansion_list = list(sorted(expansion_list, reverse=True))
+            threat_list = list(sorted(threat_list, reverse=True))
+
+            while game.me.energy > 0:
+            	if threat_list[0][0] >= expansion_list[0][0]:
+            		# attack own cell
+            		cmd_list.append(game.attack(threat_list[0][1], threat_list[0][0] * THREAT_SPENDING_CONSTANT))
+            		threat_list = threat_list[1:]
+            	else:
+            		# expand
+            		cmd_list.append(game.attack(expansion_list[0][1], game.game_map[expansion_list[0][1]].attack_cost))
+            		expansion_list = expansion_list[1:]
+
+
             # Send the command list to the server
             result = game.send_cmd(cmd_list)
             print(result)
