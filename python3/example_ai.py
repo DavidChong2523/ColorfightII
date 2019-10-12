@@ -7,7 +7,8 @@ def play_game(
         game, \
         room     = 'test', \
         username = 'User', \
-        password = 'password' '''str(int(time.time()))'''):
+        password = 'password' '''str(int(time.time()))''',
+        join_key = '12508'):
     # Connect to the server. This will connect to the public room. If you want to
     # join other rooms, you need to change the argument
     game.connect(room = room)
@@ -20,7 +21,8 @@ def play_game(
     # as the password. You should change it to something that will not change 
     # between runs so you can continue the game if disconnected.
     if game.register(username = username, \
-            password = password):
+            password = password, \
+            join_key = join_key):
         # This is the game loop
         while True:
             # The command list we will send to the server
@@ -104,14 +106,15 @@ if __name__ == '__main__':
     #rank_room = [room for room in room_list if room["rank"] and room["player_number"] < room["max_player"]]
     #room = random.choice(rank_room)["name"]
     # ======================================================================
-    room = 'public' # Delete this line if you have a room from above
+    room = 'DeepMines' # Delete this line if you have a room from above
 
     # ==========================  Play game once ===========================
     play_game(
         game     = game, \
         room     = room, \
-        username = 'ExampleAI' + str(random.randint(1, 100)), \
-        password = str(int(time.time()))
+        username = 'ExampleAI', \
+        password = 'uclaacm',
+        join_key = '12508'
     )
     # ======================================================================
 
