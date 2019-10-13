@@ -101,11 +101,11 @@ def play_game(
 
             build_list = []
             for cell in game.me.cells.values():
-                build_list.append((build(game, cell, 1, 1), cell.position))
+                build_list.append((build(game, cell, energy_co, gold_co), cell.position))
             upgrade_list = []
             defense_list = []
             for cell in game.me.cells.values():
-                upgrade_list.append((upgrade_val(game, cell, 1, 1), cell.position))
+                upgrade_list.append((upgrade_val(game, cell, energy_co, gold_co), cell.position))
                 defense_list.append((defense(game, cell, energy_co, gold_co), cell.position))
 		    
             
@@ -116,10 +116,8 @@ def play_game(
             for key in sorted(GOLD_MASTER_LIST, key=lambda gold: gold[0], reverse=True):
                 if game.game_map[key[1]].is_empty:
                     if not game.turn > 450:
-                        cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
+                        cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, energy_co, gold_co)))
                 elif game.game_map[key[1]].building.can_upgrade :
-                    print('Gold: ' + str(game.game_map[key[1]].building.upgrade_gold))
-                    print('Energy: ' + str(game.game_map[key[1]].building.upgrade_energy))
                     if game.game_map[key[1]].building.upgrade_gold < game.me.gold :
                         if not game.turn > 450:
                             cmd_list.append(game.upgrade(game.game_map[key[1]].position))
@@ -176,6 +174,8 @@ def calc_coefficients(game):
     
 
 def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
+    if cell.is_home:
+        return 1000
     map = game.game_map
     gold_value = cell.natural_gold * gold_coefficient
     energy_value = cell.natural_energy * energy_coefficient
