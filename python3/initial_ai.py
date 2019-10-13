@@ -10,7 +10,7 @@ def main():
 def play_game(
         game, \
         room     = 'DeepMines', \
-        username = 'DeepMine-v0.7', \
+        username = 'DeepMine-v0.3', \
         password = 'uclaacm', \
         join_key = '12508'):
     # Connect to the server. This will connect to the public room. If you want to
@@ -112,23 +112,27 @@ def play_game(
             # master lists for commands
             GOLD_MASTER_LIST = []
             
-            GOLD_MASTER_LIST = build_list+upgrade_list+defense_list
+            GOLD_MASTER_LIST = build_list+upgrade_list
             for key in sorted(GOLD_MASTER_LIST, key=lambda gold: gold[0], reverse=True):
                 if game.game_map[key[1]].is_empty:
-                    cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
+                    if not game.turn > 450:
+                        cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
                 elif game.game_map[key[1]].building.can_upgrade :
                     print('Gold: ' + str(game.game_map[key[1]].building.upgrade_gold))
                     print('Energy: ' + str(game.game_map[key[1]].building.upgrade_energy))
                     if game.game_map[key[1]].building.upgrade_gold < game.me.gold :
-                        cmd_list.append(game.upgrade(game.game_map[key[1]].position))
+                        if not game.turn > 450:
+                            cmd_list.append(game.upgrade(game.game_map[key[1]].position))
                         game.me.gold -= game.game_map[key[1]].building.upgrade_gold
 
             # Combine the two lists
-            ENERGY_MASTER_LIST = threat_list+expansion_list
+            ENERGY_MASTER_LIST = defense_list+expansion_list
             
             for key in sorted(ENERGY_MASTER_LIST, key=lambda energy: energy[0], reverse=True):
-                if game.game_map[key[1]].owner is game.me.uid and game.me.energy > key[0]*THREAT_SPENDING_CONSTANT:
-                    cmd_list.append(game.attack(key[1], key[0]*THREAT_SPENDING_CONSTANT))
+                '''if game.game_map[key[1]].owner is game.me.uid and game.me.energy > key[0]*THREAT_SPENDING_CONSTANT:
+                    cmd_list.append(game.attack(key[1], key[0]*THREAT_SPENDING_CONSTANT))'''
+                if game.game_map[key[1]].owner is game.me.uid:
+                    cmd_list.append(game.build(game.game_map[key[1]].position, BLD_FORTRESS))
                 elif game.me.energy > game.game_map[key[1]].attack_cost:
                     cmd_list.append(game.attack(key[1], game.game_map[key[1]].attack_cost))
             """while game.me.energy > 0:
@@ -162,8 +166,8 @@ def calc_coefficients(game):
 
 def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
     map = game.game_map
-    gold_value = cell.natural_gold*gold_coefficient
-    energy_value = cell.natural_energy*energy_coefficient
+    gold_value = cell.natural_gold * gold_coefficient
+    energy_value = cell.natural_energy * energy_coefficient
     ncost_value = cell.attack_cost*ncost_coefficient
     sum1_total = 0
     sum2_total = 0
@@ -186,7 +190,9 @@ def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_co
     if homePos is not 0:
         home = ((homePos.x-cell.position.x)**2+(homePos.y-cell.position.y)**2)**0.5
 
-    return (gold_value+energy_value-ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home
+    val = ((gold_value+energy_value)/ncost_value+sum1_total*sum1_coefficient+sum2_total*sum2_coefficient)*expansion_coefficient-home
+    print("expansion:", val)
+    return val
 
 def defense(game, cell, energy_co, gold_co):
     game_map = game.game_map
@@ -199,9 +205,9 @@ def defense(game, cell, energy_co, gold_co):
     y = position.y
     
     # check for enemy cells in 7x7 centered on cell
-    MAX_STEPS_TO_ATTACK = 6
-    for testX in range(x-3, x+4):
-        for testY in range(y-3, y+4):
+    MAX_STEPS_TO_ATTACK = 4
+    for testX in range(x-2, x+3):
+        for testY in range(y-2, y+3):
             if(testX < game_map.width and testX >= 0 and \
                testY < game_map.height and testY >= 0):
                 testCell = game_map[(testX, testY)]
@@ -216,6 +222,7 @@ def defense(game, cell, energy_co, gold_co):
                 continue
             # opponent cell
             else:
+                print("oppoenent near")
                 dist = testCell.position - position
                 steps_to_attack = abs(dist.x) + abs(dist.y)
                 test_value = MAX_STEPS_TO_ATTACK / steps_to_attack
@@ -223,6 +230,7 @@ def defense(game, cell, energy_co, gold_co):
                     value = test_value
     value /= 6
     value *= cell_val
+    print("fortress val", value)
     return value
 
 # how threatened cells are from enemy attacks
