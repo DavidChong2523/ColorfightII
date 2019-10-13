@@ -115,12 +115,8 @@ def play_game(
             GOLD_MASTER_LIST = build_list+upgrade_list
             for key in sorted(GOLD_MASTER_LIST, key=lambda gold: gold[0], reverse=True):
                 if game.game_map[key[1]].is_empty:
-<<<<<<< Updated upstream
                     if not game.turn > 450:
-                        cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
-=======
-                    cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, energy_co, gold_co)))
->>>>>>> Stashed changes
+                        cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, energy_co, gold_co)))
                 elif game.game_map[key[1]].building.can_upgrade :
                     if game.game_map[key[1]].building.upgrade_gold < game.me.gold :
                         if not game.turn > 450:
