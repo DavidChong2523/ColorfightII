@@ -321,7 +321,7 @@ def upgrade_val(game, cell, energy_co, gold_co):
         if(cell.building.name == "energy_well"):
             return energy_co * cell.natural_energy
         elif(cell.building.name == 'gold_mine'):
-            return gold_co * natural_gold
+            return gold_co * cell.natural_gold
         else: 
             return 0
 def general_val(game, cell, energy_co, gold_co):
