@@ -9,10 +9,10 @@ def main():
 
 def play_game(
         game, \
-        room     = 'DeepMines', \
-        username = 'DeepMine-v0.3', \
+        room     = 'public', \
+        username = 'DeepMines', \
         password = 'uclaacm', \
-        join_key = '12508'):
+        join_key = ''):
     # Connect to the server. This will connect to the public room. If you want to
     # join other rooms, you need to change the argument
     game.connect(room = room)
@@ -161,7 +161,7 @@ def play_game(
 def calc_coefficients(game):
     HALF_TURNS = 500
     turn = game.turn
-	'''
+    '''
     gold_co = turn / HALF_TURNS + 1
     energy_co = 1 - (turn / HALF_TURNS)
     if(turn > HALF_TURNS):
@@ -172,13 +172,11 @@ def calc_coefficients(game):
     energy_co += 1
     '''
     gold_co = turn / HALF_TURNS
-    enegy_co = 1 - (turn / HALF_TURNS)
+    energy_co = 1 - (turn / HALF_TURNS)
     return energy_co, gold_co
     
 
 def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
-    if cell.is_home:
-        return 1000
     map = game.game_map
     gold_value = cell.natural_gold * gold_coefficient
     energy_value = cell.natural_energy * energy_coefficient
