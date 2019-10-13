@@ -115,12 +115,14 @@ def play_game(
             GOLD_MASTER_LIST = build_list+upgrade_list
             for key in sorted(GOLD_MASTER_LIST, key=lambda gold: gold[0], reverse=True):
                 if game.game_map[key[1]].is_empty:
-                    cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
+                    if not game.turn > 450:
+                        cmd_list.append(game.build(game.game_map[key[1]].position, best_build(game, cell, 1, 1)))
                 elif game.game_map[key[1]].building.can_upgrade :
                     print('Gold: ' + str(game.game_map[key[1]].building.upgrade_gold))
                     print('Energy: ' + str(game.game_map[key[1]].building.upgrade_energy))
                     if game.game_map[key[1]].building.upgrade_gold < game.me.gold :
-                        cmd_list.append(game.upgrade(game.game_map[key[1]].position))
+                        if not game.turn > 450:
+                            cmd_list.append(game.upgrade(game.game_map[key[1]].position))
                         game.me.gold -= game.game_map[key[1]].building.upgrade_gold
 
             # Combine the two lists
@@ -319,9 +321,7 @@ def upgrade_val(game, cell, energy_co, gold_co):
         if(cell.building.name == "energy_well"):
             return energy_co * cell.natural_energy
         elif(cell.building.name == 'gold_mine'):
-            return gold_co * cell.natural_gold
-        elif(cell.is_home):
-            return 2
+            return gold_co * natural_gold
         else: 
             return 0
 def general_val(game, cell, energy_co, gold_co):
