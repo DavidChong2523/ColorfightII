@@ -129,9 +129,15 @@ def play_game(
             for key in sorted(ENERGY_MASTER_LIST, key=lambda energy: energy[0], reverse=True):
                 '''if game.game_map[key[1]].owner is game.me.uid and game.me.energy > key[0]*THREAT_SPENDING_CONSTANT:
                     cmd_list.append(game.attack(key[1], key[0]*THREAT_SPENDING_CONSTANT))'''
+                built_fortress = False
                 if game.game_map[key[1]].owner is game.me.uid:
-                    cmd_list.append(game.build(game.game_map[key[1]].position, BLD_FORTRESS))
-                elif game.me.energy > game.game_map[key[1]].attack_cost:
+                    adjacent = game.game_map[key[1]].position.get_surrounding_cardinals()
+                    for test_cell in adjacent:
+                        if(game_map[test_cell].owner != me.uid and game_map[test_cell].owner != 0):
+                            cmd_list.append(game.build(game.game_map[key[1]].position, BLD_FORTRESS))
+                            built_fortress = True
+                            break
+                if(not built_fortress and game.me.energy > game.game_map[key[1]].attack_cost):
                     cmd_list.append(game.attack(key[1], game.game_map[key[1]].attack_cost))
             """while game.me.energy > 0:
                 print(threat_list)
@@ -153,13 +159,18 @@ def play_game(
     game.disconnect()
 
 def calc_coefficients(game):
-    MAX_TURNS = 500
+    HALF_TURNS = 250
     turn = game.turn
     
-    gold_co = turn / MAX_TURNS
-    energy_co = 1 - (turn / MAX_TURNS)
-    return 1, 1
-    #return energy_co, gold_co
+	gold_co = turn / HALF_TURNS + 1
+    energy_co = 1 - (turn / HALF_TURNS)
+    if(turn > HALF_TURNS):
+        gold_co = 1
+        energy_co = 0
+    
+    gold_co += 1
+    energy_co += 1
+    return energy_co, gold_co
     
 
 def expansion(game, cell, gold_coefficient = 1, energy_coefficient = 1, ncost_coefficient = 0.0025, sum1_coefficient = 0.1, sum2_coefficient = 0.01, expansion_coefficient = 1, distance = 0):
