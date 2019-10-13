@@ -72,14 +72,14 @@ def play_game(
                 # If we can upgrade the building, upgrade it.
                 # Notice can_update only checks for upper bound. You need to check
                 # tech_level by yourself. 
-                if cell.building.can_upgrade and \
+                """if cell.building.can_upgrade and \
                         (cell.building.is_home or cell.building.level < me.tech_level) and \
                         cell.building.upgrade_gold < me.gold and \
                         cell.building.upgrade_energy < me.energy:
                     cmd_list.append(game.upgrade(cell.position))
                     print("We upgraded ({}, {})".format(cell.position.x, cell.position.y))
                     me.gold   -= cell.building.upgrade_gold
-                    me.energy -= cell.building.upgrade_energy
+                    me.energy -= cell.building.upgrade_energy"""
                     
                 # Build a random building if we have enough gold
                 if cell.owner == me.uid and cell.building.is_empty and me.gold >= BUILDING_COST[0]:
@@ -106,15 +106,15 @@ if __name__ == '__main__':
     #rank_room = [room for room in room_list if room["rank"] and room["player_number"] < room["max_player"]]
     #room = random.choice(rank_room)["name"]
     # ======================================================================
-    room = 'DeepMines' # Delete this line if you have a room from above
+    room = 'official_group_C' # Delete this line if you have a room from above
 
     # ==========================  Play game once ===========================
     play_game(
         game     = game, \
         room     = room, \
-        username = 'ExampleAI', \
+        username = 'DeepMinesExAI', \
         password = 'uclaacm',
-        join_key = '12508'
+        join_key = ''
     )
     # ======================================================================
 
