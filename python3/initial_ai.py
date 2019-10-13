@@ -159,8 +159,9 @@ def play_game(
     game.disconnect()
 
 def calc_coefficients(game):
-    HALF_TURNS = 250
+    HALF_TURNS = 500
     turn = game.turn
+	'''
     gold_co = turn / HALF_TURNS + 1
     energy_co = 1 - (turn / HALF_TURNS)
     if(turn > HALF_TURNS):
@@ -169,6 +170,9 @@ def calc_coefficients(game):
     
     gold_co += 1
     energy_co += 1
+    '''
+    gold_co = turn / HALF_TURNS
+    enegy_co = 1 - (turn / HALF_TURNS)
     return energy_co, gold_co
     
 
