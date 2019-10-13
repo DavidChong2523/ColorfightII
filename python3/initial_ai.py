@@ -161,7 +161,6 @@ def play_game(
 def calc_coefficients(game):
     HALF_TURNS = 250
     turn = game.turn
-    
     gold_co = turn / HALF_TURNS + 1
     energy_co = 1 - (turn / HALF_TURNS)
     if(turn > HALF_TURNS):
@@ -321,7 +320,7 @@ def upgrade_val(game, cell, energy_co, gold_co):
         if(cell.building.name == "energy_well"):
             return energy_co * cell.natural_energy
         elif(cell.building.name == 'gold_mine'):
-            return gold_co * natural_gold
+            return gold_co * cell.natural_gold
         else: 
             return 0
 def general_val(game, cell, energy_co, gold_co):
